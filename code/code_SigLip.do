@@ -14,8 +14,8 @@ Required Stata packages
     estout, winsor2, and reghdfe.
 */
 
-cd "/Users/zhuxinbo/Desktop/程序员/文章复现/The Informativeness of images in firms annual reports/Replication/SigLip"
-import delimited using "/Users/zhuxinbo/Desktop/程序员/文章复现/The Informativeness of images in firms annual reports/Replication/SigLip/SigLip_data.csv",clear
+cd "Replication/SigLip"
+import delimited using "Replication/SigLip/SigLip_data.csv",clear
 * Use the prepared base-sample indicator and retain fiscal years after 2001.
 keep if base_sample_flag == 1
 keep if fyear > 2001
@@ -317,7 +317,7 @@ esttab t6_m1 t6_m2 t6_m3 t6_m4 using "Table6-1.rtf", replace ///
 restore
 * Table 7. Analyst forecast error regressions by outcome quarter
 preserve
-import delimited using "/Users/zhuxinbo/Desktop/程序员/文章复现/The Informativeness of images in firms annual reports/Replication/SigLip/analyst_firm_SigLip.csv",clear
+import delimited using "Replication/SigLip/analyst_firm_SigLip.csv",clear
 * Use the prepared analyst-firm-quarter sample and build fixed-effect and cluster IDs.
 egen long firm_id = group(gvkey)
 egen long analyst_num = group(analyst_id)
