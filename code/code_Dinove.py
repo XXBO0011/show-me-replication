@@ -36,34 +36,18 @@ OUTPUT = ROOT / "sp1500_stocklight_pdf_urls_v4.csv"
 # js is the expression to evaluate. retries caps the total attempts when Chrome times out.
 # Return the result as stripped text.
 def chrome_js(js, retries=1):
-    script = (
-        'tell application "Google Chrome" to '
-        'execute active tab of front window javascript '
-        + json.dumps(js)
-    )
-
+    script = ('tell application "Google Chrome" to ''execute active tab of front window javascript '+ json.dumps(js))
     for attempt in range(1, retries + 1):
         try:
-            result = subprocess.run(
-                ["osascript", "-e", script],
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=45
-            )
-            return result.stdout.strip()
-
+            result = subprocess.run(["osascript", "-e", script],capture_output=True, text=True,check=True,timeout=45)return result.stdout.strip()
         except subprocess.TimeoutExpired:
             if attempt == retries:
                 raise
-
             print(f"Chrome 暂未返回结果，5 秒后重试（{attempt + 1}/{retries}）。")
             time.sleep(5)
-
         except subprocess.CalledProcessError as error:
             print("AppleScript 详细错误：", error.stderr)
             raise
-
 # Poll the active tab until the JavaScript condition evaluates to true.
 def wait_for_page(condition):
     deadline = time.monotonic() + 60
@@ -73,7 +57,6 @@ def wait_for_page(condition):
             return
         time.sleep(1)
     raise TimeoutError("网页未准备好，请检查 Chrome 当前页面。")
-
 # Open a URL in the same active tab used for JavaScript queries.
 def open_url(url):
     script = ('tell application "Google Chrome" to ''set URL of active tab of front window to '+ json.dumps(url))
@@ -96,33 +79,19 @@ while list_url is not None:
     # Wait for the expected listing URL and company links before collecting reports.
     for attempt in range(1, 4):
         try:
-            wait_for_page(
-                f"location.href === {json.dumps(list_url)}"
-                f" && ({more_js}).length > 0"
-            )
-
+            wait_for_page(f"location.href === {json.dumps(list_url)}"f" && ({more_js}).length > 0")
             break
-
         except TimeoutError:
             # Use the title and page body to identify the site's "Retry later" response.
-            text = chrome_js(
-                "document.title + ' ' + "
-                "(document.body ? document.body.innerText : '')"
-            ).lower()
-
+            text = chrome_js("document.title + ' ' + ""(document.body ? document.body.innerText : '')").lower()
             if "retry later" not in text:
                 raise
-
             if attempt == 3:
-                raise TimeoutError(
-                    f"该页多次显示 Retry later，请稍后再运行：{list_url}"
-                )
-
+                raise TimeoutError(f"该页多次显示 Retry later，请稍后再运行：{list_url}")
             # Back off for 60 seconds before the first retry and 120 before the second.
             delay = 60 * (2 ** (attempt - 1))
             print(f"页面要求稍后重试，等待 {delay} 秒后重新打开同一页。")
             time.sleep(delay)
-
             open_url(list_url)
 
     # Read the company URLs and next-page link before leaving the current listing.
